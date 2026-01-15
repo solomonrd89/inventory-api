@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template  # <--- Added render_template
 import pymysql  # We use the library that worked for you
 import pymysql.cursors  # Needed to make data look like JSON
 import os
@@ -24,7 +24,7 @@ def get_db_connection():
 # 1. The Home Page
 @app.route("/")
 def home():
-    return "<h1>Inventory API is Running with PyMySQL!</h1>"
+    return render_template("index.html")
 
 
 # 2. The "Add Product" Endpoint

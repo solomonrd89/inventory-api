@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inventory Manager</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+        .card { border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; border-radius: 8px; }
+        input { padding: 8px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+        button { background-color: #28a745; color: white; padding: 10px; border: none; width: 100%; cursor: pointer; }
+        button:hover { background-color: #218838; }
+        #productList { list-style: none; padding: 0; }
+        .item { background: #f9f9f9; padding: 10px; margin-bottom: 5px; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+    <h1>📦 Inventory Manager</h1>
+
+    <div class="card">
+        <h3>Add New Product</h3>
+        <input type="text" id="pName" placeholder="Product Name (e.g. Mouse)">
+        <input type="number" id="pPrice" placeholder="Price">
+        <button onclick="addProduct()">Add to Inventory</button>
+    </div>
+
+    <div class="card">
+        <h3>Search Inventory</h3>
+        <input type="text" id="searchBox" placeholder="Type to search..." onkeyup="searchProduct()">
+    </div>
+
+    <ul id="productList"></ul>
+
+    <script>
+        // 1. Function to Load all products
+        async function loadProducts(query = '') {
+            let url = '/products';
+            if (query) {
+                url = `/search?q=${query}`;
+            }
+            
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            const list = document.getElementById('productList');
+            list.innerHTML = ''; // Clear current list
+
+            if (data.length === 0 || data.error) {
+                list.innerHTML = '<p>No products found.</p>';
+                return;
+            }
+
+            data.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'item';
+                li.innerHTML = `<strong>${item.name}</strong> <span>₹${item.price}</span>`;
+                list.appendChild(li);
+            });
+        }
+
+        // 2. Function to Add a Product
+        async function addProduct() {
+            const name = document.getElementById('pName').value;
+            const price = document.getElementById('pPrice').value;
+            
+            if(!name || !price) { alert("Please fill details"); return; }
+
+            // Call your Python API
+            await fetch(`/add?name=${name}&price=${price}`);
+            
+            // Clear boxes and reload list
+            document.getElementById('pName').value = '';
+            document.getElementById('pPrice').value = '';
+            loadProducts(); 
+        }
+
+        // 3. Function to Search
+        function searchProduct() {
+            const query = document.getElementById('searchBox').value;
+            loadProducts(query);
+        }
+
+        // Load items when page opens
+        loadProducts();
+    </script>
+</body>
+</html>
